@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Management System</title>
+<link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Главный контейнер приложения -->
+    <div id="app">
+        <!-- Навигация (будет скрыта на странице логина) -->
+        <nav id="navbar" class="hidden">
+            <div class="nav-brand">ClientSystem</div>
+            <div class="nav-links">
+                <a href="#engineer" class="nav-link">Инженер</a>
+                <a href="#admin" class="nav-link">Администратор</a>
+                <button id="logout-btn" class="btn-secondary">Выйти</button>
+            </div>
+        </nav>
+
+        <!-- Контейнеры для разных страниц -->
+        <div id="login-page" class="page active">
+            <!-- Страница логина -->
+            <div id="login-page" class="page active">
+                <div class="login-container">
+                    <h2>Вход в систему</h2>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label>Логин:</label>
+                            <input type="text" id="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Пароль:</label>
+                            <input type="password" id="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Роль:</label>
+                            <select id="role">
+                                <option value="engineer">Инженер</option>
+                                <option value="admin">Администратор</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Войти</button>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+
+        <div id="engineer-page" class="page hidden">
+            <!-- Интерфейс инженера -->
+             <div id="engineer-page" class="page hidden">
+                <div class="page-header">
+                    <h1>Панель инженера</h1>
+                    <div class="status-indicators">
+                        <div id="online-status" class="status-online">
+                            <span class="status-dot"></span>
+                            Онлайн
+                        </div>
+                        <div id="gps-status" class="status-gps">
+                             <span class="status-dot"></span>
+                            GPS: Не доступно
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <!-- Форма добавления клиента -->
+                    <div class="card">
+                        <h2>Добавить нового клиента</h2>
+                        <form id="client-form" class="client-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="client-name">Имя клиента *</label>
+                                    <input type="text" id="client-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="client-phone">Телефон *</label>
+                                    <input type="tel" id="client-phone" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="client-type">Тип объекта *</label>
+                                    <select id="client-type" required>
+                                        <option value="">Выберите тип</option>
+                                        <option value="private_house">Частный дом</option>
+                                        <option value="hotel">Отель</option>
+                                        <option value="cafe">Кафе</option>
+                                        <option value="restaurant">Ресторан</option>
+                                        <option value="office">Офис</option>
+                                        <option value="other">Другое</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="client-address">Адрес *</label>
+                                    <div class="address-input">
+                                        <input type="text" id="client-address" required>
+                                        <button type="button" id="get-location-btn" class="btn-icon" title="Определить местоположение">
+                                            📍
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="client-services">Требуемые услуги</label>
+                                <div class="services-checkboxes">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="services" value="internet"> Интернет
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="services" value="tv"> Телевидение
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="services" value="cctv"> Видеонаблюдение
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="services" value="telephony"> Телефония
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="client-needs">Особые потребности/комментарии</label>
+                                <textarea id="client-needs" rows="3" placeholder="Дополнительная информация..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="client-priority">Приоритет</label>
+                                <select id="client-priority">
+                                    <option value="low">Низкий</option>
+                                    <option value="medium" selected>Средний</option>
+                                    <option value="high">Высокий</option>
+                                </select>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" id="save-draft-btn" class="btn-secondary">Сохранить черновик</button>
+                                <button type="submit" id="submit-client-btn" class="btn-primary">
+                                    <span id="submit-text">Добавить клиента</span>
+                                    <span id="submit-loading" class="hidden">Сохранение...</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Список последних клиентов -->
+                    <div class="card">
+                        <h2>Последние добавленные клиенты</h2>
+                        <div id="recent-clients-list" class="clients-list">
+                            <div class="empty-state">
+                                <p>Клиенты еще не добавлены</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Офлайн-очередь -->
+                    <div id="offline-queue" class="card hidden">
+                        <h2>Офлайн-очередь</h2>
+                        <div id="offline-queue-list" class="queue-list">
+                            <!-- Будет заполняться JavaScript -->
+                        </div>
+                        <button id="sync-now-btn" class="btn-primary">Синхронизировать сейчас</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="admin-page" class="page hidden">
+            <!-- Интерфейс администратора -->
+            <div id="admin-page" class="page hidden">
+                <div class="page-header">
+                    <h1>Панель администратора</h1>
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-clients">0</div>
+                            <div class="stat-label">Всего клиентов</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="new-this-week">0</div>
+                            <div class="stat-label">Новых за неделю</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="high-priority">0</div>
+                            <div class="stat-label">Высокий приоритет</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-controls">
+                    <!-- Фильтры -->
+                    <div class="filters-card card">
+                        <h3>Фильтры и поиск</h3>
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label for="filter-date-from">Дата от</label>
+                                <input type="date" id="filter-date-from">
+                            </div>
+                            <div class="form-group">
+                                <label for="filter-date-to">Дата до</label>
+                                <input type="date" id="filter-date-to">
+                            </div>
+                            <div class="form-group">
+                                <label for="filter-type">Тип объекта</label>
+                                <select id="filter-type">
+                                    <option value="">Все типы</option>
+                                    <option value="private_house">Частный дом</option>
+                                    <option value="hotel">Отель</option>
+                                    <option value="cafe">Кафе</option>
+                                    <option value="restaurant">Ресторан</option>
+                                    <option value="office">Офис</option>
+                                    <option value="other">Другое</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filter-service">Услуга</label>
+                                <select id="filter-service">
+                                    <option value="">Все услуги</option>
+                                    <option value="internet">Интернет</option>
+                                    <option value="tv">Телевидение</option>
+                                    <option value="cctv">Видеонаблюдение</option>
+                                    <option value="telephony">Телефония</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filter-priority">Приоритет</label>
+                                <select id="filter-priority">
+                                    <option value="">Все приоритеты</option>
+                                    <option value="high">Высокий</option>
+                                    <option value="medium">Средний</option>
+                                    <option value="low">Низкий</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filter-engineer">Инженер</label>
+                                <select id="filter-engineer">
+                                    <option value="">Все инженеры</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="search-row">
+                            <div class="form-group search-group">
+                                <label for="search-clients">Поиск по клиентам</label>
+                                <input type="text" id="search-clients" placeholder="Имя, телефон, адрес...">
+                            </div>
+                            <div class="filter-actions">
+                                <button id="apply-filters" class="btn-primary">Применить фильтры</button>
+                                <button id="reset-filters" class="btn-secondary">Сбросить</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Экспорт -->
+                    <div class="export-card card">
+                        <h3>Экспорт данных</h3>
+                        <div class="export-options">
+                            <div class="form-group">
+                                <label for="export-format">Формат</label>
+                                <select id="export-format">
+                                    <option value="excel">Excel (.xlsx)</option>
+                                    <option value="csv">CSV</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="export-range">Период</label>
+                                <select id="export-range">
+                                    <option value="all">Все данные</option>
+                                    <option value="today">Сегодня</option>
+                                    <option value="week">Эта неделя</option>
+                                    <option value="month">Этот месяц</option>
+                                    <option value="custom">Выбрать период</option>
+                                </select>
+                            </div>
+                            <button id="export-btn" class="btn-primary">Экспортировать</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Графики и визуализация -->
+                <div class="charts-section">
+                    <div class="card">
+                        <h3>Статистика по типам объектов</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-types"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Распределение по услугам</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-services"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Активность по дням</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-activity"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Приоритеты клиентов</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-priorities"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Таблица клиентов -->
+                <div class="clients-table-section">
+                    <div class="card">
+                        <div class="table-header">
+                            <h3>Клиенты</h3>
+                            <div class="table-actions">
+                                <div class="table-info">
+                                    Показано: <span id="shown-count">0</span> из <span id="total-count">0</span>
+                                </div>
+                                <button id="refresh-data" class="btn-secondary">Обновить</button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table id="clients-table" class="clients-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="name">Имя клиента</th>
+                                        <th data-sort="type">Тип объекта</th>
+                                        <th data-sort="phone">Телефон</th>
+                                        <th data-sort="address">Адрес</th>
+                                        <th data-sort="services">Услуги</th>
+                                        <th data-sort="priority">Приоритет</th>
+                                        <th data-sort="engineer">Инженер</th>
+                                        <th data-sort="timestamp">Дата добавления</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clients-table-body">
+                                    <!-- Данные будут заполняться JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-footer">
+                            <div class="pagination">
+                                <button id="prev-page" class="btn-secondary" disabled>Назад</button>
+                                <span id="page-info">Страница 1 из 1</span>
+                                <button id="next-page" class="btn-secondary" disabled>Вперед</button>
+                            </div>
+                            <div class="rows-per-page">
+                                <label>Строк на странице:</label>
+                                <select id="rows-per-page">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Индикатор загрузки -->
+        <div id="loading" class="hidden">
+            <div class="loading-spinner">Загрузка...</div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/router.js"></script>
+    <script src="/static/js/engineer.js"></script>
+    <script src="/static/js/admin.js"></script>
+    <script src="/static/js/offline.js"></script>
+
+    <!-- Библиотеки для администратора -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
